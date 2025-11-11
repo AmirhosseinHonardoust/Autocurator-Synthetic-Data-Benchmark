@@ -55,13 +55,13 @@ Assesses whether synthetic data supports the same predictions.
 ## Architecture Overview
 ```
 ┌───────────────┐
-│ real.csv      │
+│   real.csv    │
 │ synthetic.csv │
 └──────┬────────┘
        │
        ▼
 ┌───────────────┐
-│ Data Loader   │ → Align schema, preprocess columns
+│  Data Loader  │ → Align schema, preprocess columns
 └──────┬────────┘
        ▼
 ┌───────────────┐
@@ -73,7 +73,7 @@ Assesses whether synthetic data supports the same predictions.
 └──────┬────────┘
        ▼
 ┌───────────────┐
-│ HTML Report   │ → Jinja2 templated dashboard
+│  HTML Report  │ → Jinja2 templated dashboard
 └───────────────┘
 ```
 
