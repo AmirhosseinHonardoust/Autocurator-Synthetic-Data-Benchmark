@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Autocurator Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h1,h2 { margin: 0.5em 0; }
+    pre { background: #f6f8fa; padding: 12px; overflow-x:auto; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Autocurator: Synthetic Data Benchmark</h1>
+  <p><b>Task:</b> classification &nbsp;·&nbsp; <b>Target:</b> target</p>
+
+  <h2>Summary Metrics</h2>
+  <pre>{
+  "fidelity": {
+    "per_feature_mean_jsd": 0.47503994540049793,
+    "per_feature_mean_ks": 0.12000000000000002,
+    "per_feature_mean_wasserstein": 290.84,
+    "correlation_distance": 0.006492441999675345
+  },
+  "coverage": {
+    "precision_like": 1.0,
+    "recall_like": 1.0
+  },
+  "privacy": {
+    "syn_to_real_mean_nnd": 0.22144160569421087,
+    "syn_to_real_min_nnd": 0.11330112566217533,
+    "syn_to_real_1pct_nnd": 0.11671207046792977,
+    "mia_auc_distance": 1.0
+  },
+  "utility": {
+    "TSTR_AUC": 1.0,
+    "TRTS_AUC": 1.0
+  },
+  "rows_real": 10,
+  "rows_synthetic": 10
+}</pre>
+
+  <h2>Visuals</h2>
+  <div class="grid">
+    <div><h3>PCA</h3><img src="plots/pca.png" width="100%"></div>
+    <div><h3>Per-Feature Distributions</h3><img src="plots/distributions.png" width="100%"></div>
+    <div><h3>Correlation Heatmaps</h3><img src="plots/correlations.png" width="100%"></div>
+  </div>
+
+  <h2>Per-Feature Fidelity</h2>
+  <pre>{
+  "age": {
+    "JSD": 0.5265537695468318,
+    "KS": 0.1,
+    "Wasserstein": 1.1
+  },
+  "income": {
+    "JSD": 0.6242803065512634,
+    "KS": 0.2,
+    "Wasserstein": 1450.0
+  },
+  "score": {
+    "JSD": 0.624280306551264,
+    "KS": 0.1,
+    "Wasserstein": 2.5
+  },
+  "visits": {
+    "JSD": 0.6000853443531302,
+    "KS": 0.2,
+    "Wasserstein": 0.6
+  },
+  "target": {
+    "JSD": 0.0,
+    "KS": 0.0,
+    "Wasserstein": 0.0
+  }
+}</pre>
+</body>
+</html>

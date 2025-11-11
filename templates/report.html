@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Autocurator Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h1,h2 { margin: 0.5em 0; }
+    pre { background: #f6f8fa; padding: 12px; overflow-x:auto; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Autocurator: Synthetic Data Benchmark</h1>
+  <p><b>Task:</b> {{ task }} &nbsp;·&nbsp; <b>Target:</b> {{ target or '—' }}</p>
+
+  <h2>Summary Metrics</h2>
+  <pre>{{ summary_json }}</pre>
+
+  <h2>Visuals</h2>
+  <div class="grid">
+    <div><h3>PCA</h3><img src="{{ pca_path }}" width="100%"></div>
+    <div><h3>Per-Feature Distributions</h3><img src="{{ dist_path }}" width="100%"></div>
+    <div><h3>Correlation Heatmaps</h3><img src="{{ corr_path }}" width="100%"></div>
+  </div>
+
+  <h2>Per-Feature Fidelity</h2>
+  <pre>{{ per_feature_json }}</pre>
+</body>
+</html>
