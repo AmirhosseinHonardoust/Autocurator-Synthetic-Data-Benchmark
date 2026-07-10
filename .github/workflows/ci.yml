@@ -8,13 +8,17 @@ on:
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install package and dev tools
         run: |
@@ -29,6 +33,28 @@ jobs:
 
       - name: Mypy (types)
         run: mypy src
+
+      - name: Pytest
+        run: pytest -q
+
+  reproducible-install:
+    # Verify the pinned lockfile resolves and the suite passes on the version it
+    # was compiled for.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install from lockfile
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock
+          pip install --no-deps -e .
+          pip install pytest pytest-cov prdc
 
       - name: Pytest
         run: pytest -q
