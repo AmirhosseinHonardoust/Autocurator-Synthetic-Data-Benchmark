@@ -10,14 +10,14 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-    "numpy",
-    "pandas",
-    "scipy",
-    "scikit-learn",
-    "matplotlib",
-    "seaborn",
-    "jinja2",
-    "pyyaml",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "scikit-learn>=1.2",
+    "matplotlib>=3.6",
+    "seaborn>=0.12",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +26,7 @@ dev = [
     "black",
     "mypy",
     "pytest",
+    "pytest-cov",
 ]
 
 [project.scripts]
@@ -34,6 +35,8 @@ autocurator = "autocurator.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+autocurator = ["templates/*.html"]
 
 [tool.ruff]
 line-length = 100
@@ -46,3 +49,10 @@ line-length = 100
 
 [tool.mypy]
 ignore_missing_imports = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=autocurator --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["tests"]

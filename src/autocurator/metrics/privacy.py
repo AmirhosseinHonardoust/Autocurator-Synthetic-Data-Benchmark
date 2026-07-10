@@ -15,7 +15,7 @@ def nn_distance_stats(X_real: np.ndarray, X_syn: np.ndarray) -> dict[str, float]
 
 
 def membership_inference_auc(X_real: np.ndarray, X_syn: np.ndarray) -> dict[str, float]:
-    """Distance-based membership-inference proxy.
+    """Distance-based membership-inference proxy (no holdout required).
 
     An attacker scores each record by proximity to the real set. Real records
     must be compared against their nearest *other* real record (self-matches at
@@ -43,3 +43,27 @@ def membership_inference_auc(X_real: np.ndarray, X_syn: np.ndarray) -> dict[str,
     except ValueError:
         auc = float("nan")
     return {"mia_auc_distance": float(auc)}
+
+
+def membership_inference_holdout_auc(
+    X_members: np.ndarray, X_syn: np.ndarray, X_holdout: np.ndarray
+) -> dict[str, float]:
+    """Proper distance-to-closest-record membership-inference attack.
+
+    Given real records that the generator trained on (``members``) and disjoint
+    real records it never saw (``holdout``/non-members), the attacker labels a
+    candidate a member if it lies unusually close to the synthetic set. AUC of
+    (is-member) vs. (-distance-to-nearest-synthetic) quantifies attack success:
+    **0.5 means the generator leaks nothing**; values above 0.5 indicate members
+    are closer to synthetic than non-members, i.e. training-data leakage.
+    """
+    nn = NearestNeighbors(n_neighbors=1).fit(X_syn)
+    d_member, _ = nn.kneighbors(X_members, n_neighbors=1)
+    d_holdout, _ = nn.kneighbors(X_holdout, n_neighbors=1)
+    y = np.concatenate([np.ones(len(d_member)), np.zeros(len(d_holdout))])
+    score = -np.concatenate([d_member[:, 0], d_holdout[:, 0]])
+    try:
+        auc = roc_auc_score(y, score)
+    except ValueError:
+        auc = float("nan")
+    return {"mia_auc_holdout": float(auc)}

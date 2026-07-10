@@ -1,15 +1,21 @@
+from importlib import resources
 from pathlib import Path
 
 from jinja2 import Template
 
-# Repo layout: <root>/src/autocurator/report.py  ->  <root>/templates/report.html
-_DEFAULT_TEMPLATE = Path(__file__).resolve().parents[2] / "templates" / "report.html"
+
+def _default_template_text() -> str:
+    """Load the bundled report template (works from a wheel or editable install)."""
+    return (
+        resources.files("autocurator").joinpath("templates/report.html").read_text(encoding="utf-8")
+    )
 
 
-def render_report(out_path: str, context: dict, template_path: str | None = None):
-    template_file = Path(template_path) if template_path else _DEFAULT_TEMPLATE
-    with open(template_file, encoding="utf-8") as f:
-        tpl = Template(f.read())
-    html = tpl.render(**context)
+def render_report(out_path: str, context: dict, template_path: str | None = None) -> None:
+    if template_path:
+        tpl_text = Path(template_path).read_text(encoding="utf-8")
+    else:
+        tpl_text = _default_template_text()
+    html = Template(tpl_text).render(**context)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
