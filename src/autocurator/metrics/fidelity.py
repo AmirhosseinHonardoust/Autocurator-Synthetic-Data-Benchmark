@@ -4,7 +4,7 @@ from scipy.spatial.distance import jensenshannon
 from scipy.stats import ks_2samp, wasserstein_distance
 
 
-def _hist(p, bins=30):
+def _hist(p: np.ndarray, bins: int = 30) -> tuple[np.ndarray, np.ndarray]:
     p = p[~np.isnan(p)]
     if len(p) == 0:
         return np.array([1.0]), np.array([0.0, 1.0])
@@ -13,8 +13,10 @@ def _hist(p, bins=30):
     return h, edges
 
 
-def per_feature_similarity(df_r: pd.DataFrame, df_s: pd.DataFrame, bins: int = 30):
-    results = {}
+def per_feature_similarity(
+    df_r: pd.DataFrame, df_s: pd.DataFrame, bins: int = 30
+) -> dict[str, dict[str, float]]:
+    results: dict[str, dict[str, float]] = {}
     for col in df_r.columns:
         if not pd.api.types.is_numeric_dtype(df_r[col]):
             continue
@@ -28,7 +30,7 @@ def per_feature_similarity(df_r: pd.DataFrame, df_s: pd.DataFrame, bins: int = 3
     return results
 
 
-def correlation_distance(df_r: pd.DataFrame, df_s: pd.DataFrame):
+def correlation_distance(df_r: pd.DataFrame, df_s: pd.DataFrame) -> float | None:
     num_cols = [c for c in df_r.columns if pd.api.types.is_numeric_dtype(df_r[c])]
     if len(num_cols) < 2:
         return None

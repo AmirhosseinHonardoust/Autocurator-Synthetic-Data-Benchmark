@@ -1,0 +1,9 @@
+# Example Autocurator config. CLI arguments override anything set here.
+real: data/real.csv
+synthetic: data/synthetic.csv
+target: target
+task: classification
+out_dir: outputs/runs/example_run
+report: reports/example_run.html
+k: 5
+utility_model: linear

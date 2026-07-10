@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 plt.switch_backend("Agg")  # non-interactive backend, safe for headless CI
 
 
-def pca_scatter(df_r: pd.DataFrame, df_s: pd.DataFrame, out_path: str):
+def pca_scatter(df_r: pd.DataFrame, df_s: pd.DataFrame, out_path: str) -> None:
     num_cols = [c for c in df_r.columns if pd.api.types.is_numeric_dtype(df_r[c])]
     if len(num_cols) < 2:
         return
@@ -29,7 +29,7 @@ def pca_scatter(df_r: pd.DataFrame, df_s: pd.DataFrame, out_path: str):
 
 def per_feature_hist(
     df_r: pd.DataFrame, df_s: pd.DataFrame, out_path: str, cols: list[str] | None = None
-):
+) -> None:
     cols = cols or [c for c in df_r.columns if pd.api.types.is_numeric_dtype(df_r[c])][:6]
     if not cols:
         return
@@ -47,7 +47,7 @@ def per_feature_hist(
     plt.close()
 
 
-def corr_heatmaps(df_r: pd.DataFrame, df_s: pd.DataFrame, out_path: str):
+def corr_heatmaps(df_r: pd.DataFrame, df_s: pd.DataFrame, out_path: str) -> None:
     num_cols = [c for c in df_r.columns if pd.api.types.is_numeric_dtype(df_r[c])]
     if len(num_cols) < 2:
         return

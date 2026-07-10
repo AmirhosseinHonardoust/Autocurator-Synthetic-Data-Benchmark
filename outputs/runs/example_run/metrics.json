@@ -7,14 +7,16 @@
       "correlation_distance": 0.006492441999675345
     },
     "coverage": {
-      "precision_like": 1.0,
-      "recall_like": 1.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "density": 1.16,
+      "coverage": 1.0
     },
     "privacy": {
-      "syn_to_real_mean_nnd": 0.22144160569421087,
-      "syn_to_real_min_nnd": 0.11330112566217533,
-      "syn_to_real_1pct_nnd": 0.11671207046792977,
-      "mia_auc_distance": 0.0
+      "syn_to_real_mean_nnd": 0.29197631270941,
+      "syn_to_real_min_nnd": 0.1322782106299684,
+      "syn_to_real_1pct_nnd": 0.1356548904716971,
+      "mia_auc_distance": 0.039999999999999994
     },
     "utility": {
       "TSTR_AUC": 1.0,

@@ -1,11 +1,17 @@
+from typing import Any
+
+import numpy as np
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import r2_score, roc_auc_score
 
 from ..preprocess import to_feature_space
 
 
-def _feature_matrices(df_r: pd.DataFrame, df_s: pd.DataFrame, target: str):
+def _feature_matrices(
+    df_r: pd.DataFrame, df_s: pd.DataFrame, target: str
+) -> tuple[np.ndarray, np.ndarray]:
     """Encode real and synthetic features into an aligned numeric space.
 
     The encoder is fit on the union of both feature sets so that one-hot
@@ -22,7 +28,25 @@ def _feature_matrices(df_r: pd.DataFrame, df_s: pd.DataFrame, target: str):
     return X_all[:n_r], X_all[n_r:]
 
 
-def _classification_auc(model, X_train, y_train, X_test, y_test) -> float:
+def _make_models(task: str, model: str) -> tuple[Any, Any]:
+    if task == "classification":
+        if model == "rf":
+            return (
+                RandomForestClassifier(n_estimators=200, random_state=0),
+                RandomForestClassifier(n_estimators=200, random_state=0),
+            )
+        return LogisticRegression(max_iter=1000), LogisticRegression(max_iter=1000)
+    if model == "rf":
+        return (
+            RandomForestRegressor(n_estimators=200, random_state=0),
+            RandomForestRegressor(n_estimators=200, random_state=0),
+        )
+    return Ridge(), Ridge()
+
+
+def _classification_auc(
+    model: Any, X_train: np.ndarray, y_train: pd.Series, X_test: np.ndarray, y_test: pd.Series
+) -> float:
     model.fit(X_train, y_train)
     classes = list(model.classes_)
     try:
@@ -36,22 +60,33 @@ def _classification_auc(model, X_train, y_train, X_test, y_test) -> float:
 
 
 def tstr_trts_scores(
-    df_r: pd.DataFrame, df_s: pd.DataFrame, target: str, task: str = "classification"
+    df_r: pd.DataFrame,
+    df_s: pd.DataFrame,
+    target: str,
+    task: str = "classification",
+    model: str = "linear",
 ) -> dict[str, float] | None:
+    """Train-on-synthetic-test-on-real and its reverse.
+
+    ``model`` selects the estimator family: ``"linear"`` (LogisticRegression /
+    Ridge) or ``"rf"`` (random forest), which captures non-linear structure a
+    linear baseline can miss.
+    """
     if target not in df_r.columns or target not in df_s.columns:
         return None
 
     Xr, Xs = _feature_matrices(df_r, df_s, target)
     yr, ys = df_r[target], df_s[target]
+    model_r, model_s = _make_models(task, model)
 
     if task == "classification":
         # TSTR: train on synthetic, test on real. TRTS: train on real, test on synthetic.
-        tstr_auc = _classification_auc(LogisticRegression(max_iter=1000), Xs, ys, Xr, yr)
-        trts_auc = _classification_auc(LogisticRegression(max_iter=1000), Xr, yr, Xs, ys)
+        tstr_auc = _classification_auc(model_s, Xs, ys, Xr, yr)
+        trts_auc = _classification_auc(model_r, Xr, yr, Xs, ys)
         return {"TSTR_AUC": tstr_auc, "TRTS_AUC": trts_auc}
 
-    model_s = Ridge().fit(Xs, ys)
-    model_r = Ridge().fit(Xr, yr)
+    model_s.fit(Xs, ys)
+    model_r.fit(Xr, yr)
     tstr_r2 = r2_score(yr, model_s.predict(Xr))
     trts_r2 = r2_score(ys, model_r.predict(Xs))
     return {"TSTR_R2": float(tstr_r2), "TRTS_R2": float(trts_r2)}

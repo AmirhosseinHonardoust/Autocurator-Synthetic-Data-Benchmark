@@ -16,11 +16,13 @@ This benchmark analyzes a small dataset of customer attributes (`age`, `income`,
 |  | Mean KS | 0.12 | Slight difference in cumulative distributions |
 |  | Mean Wasserstein | 290.8 | Variation in scale between features |
 |  | Correlation Distance | 0.0065 | Very high structure preservation |
-| **Coverage** | Precision-like | 1.0 | Synthetic points fall within real distribution |
-|  | Recall-like | 1.0 | Real points represented in synthetic manifold |
-| **Privacy** | Mean NN Distance | 0.22 | Average synthetic-to-real nearest-neighbor distance |
+| **Coverage** | Precision | 1.0 | Synthetic points inside a real neighborhood |
+|  | Recall | 1.0 | Real points inside a synthetic neighborhood |
+|  | Density | 1.16 | Avg. real neighborhoods each synthetic point falls in (÷k) |
+|  | Coverage | 1.0 | Real points with a synthetic neighbor nearby |
+| **Privacy** | Mean NN Distance | 0.29 | Average synthetic-to-real nearest-neighbor distance |
 |  | Min NN Distance | 0.11 | Closest any synthetic point sits to a real point |
-|  | MIA AUC | 0.00 | Far from 0.5 → real and synthetic are distinguishable; below 0.5 signals memorization (see note) |
+|  | MIA AUC | 0.04 | Far from 0.5 → real and synthetic are distinguishable; below 0.5 signals memorization (see note) |
 | **Utility** | TSTR AUC | 1.0 | Synthetic training transfers to real |
 |  | TRTS AUC | 1.0 | Real training transfers to synthetic |
 
@@ -38,14 +40,17 @@ Measures how close synthetic data is to real data.
 - **Correlation Distance:** Difference between correlation matrices of real and synthetic data.
 
 ### **Coverage**
-PRDC-like metrics describing manifold overlap.
-- **Precision:** Synthetic data within the real data’s neighborhood.
-- **Recall:** How well synthetic data represents all real patterns.
+PRDC metrics (Naeem et al., 2020) using per-point k-nearest-neighbor hyperspheres.
+- **Precision:** Fraction of synthetic points inside a real hypersphere.
+- **Recall:** Fraction of real points inside a synthetic hypersphere.
+- **Density:** Average number of real hyperspheres each synthetic point falls into, normalized by `k` (robust to outliers).
+- **Coverage:** Fraction of real points with at least one synthetic point nearby.
 
 ### **Privacy**
 Quantifies distance and distinguishability.
 - **Nearest Neighbor Distance:** Larger synthetic-to-real distances indicate less overlap.
 - **Membership Inference Attack (MIA):** Distance-based re-identification proxy. An AUC near **0.5** means real and synthetic are indistinguishable by nearest-neighbor distance (low risk). Values far from 0.5 mean they are distinguishable; **below 0.5** indicates synthetic points sit unusually close to real ones (possible memorization / higher risk). Real points are compared against their nearest *other* real point so self-matches don't make the attack trivially perfect.
+- **Holdout MIA (optional):** If you pass `--holdout` a disjoint real set the generator never saw, `mia_auc_holdout` runs the stronger distance-to-closest-record attack: members vs. non-members scored by proximity to synthetic. **0.5 = no leakage**; above 0.5 means training records are closer to synthetic than holdout records.
 
 ### **Utility**
 Assesses whether synthetic data supports the same predictions.
@@ -97,24 +102,28 @@ autocurator/
 │           └── correlations.png
 ├── reports/
 │   └── example_run.html
+├── configs/
+│   └── example.yaml
 ├── src/
 │   └── autocurator/
 │       ├── __init__.py
 │       ├── cli.py
+│       ├── config.py
 │       ├── loaders.py
 │       ├── preprocess.py
 │       ├── viz.py
 │       ├── report.py
+│       ├── templates/
+│       │   └── report.html
 │       └── metrics/
 │           ├── __init__.py
 │           ├── fidelity.py
 │           ├── coverage.py
 │           ├── utility.py
 │           └── privacy.py
-├── templates/
-│   └── report.html
 ├── tests/
 │   ├── conftest.py
+│   ├── test_config.py
 │   ├── test_metrics.py
 │   └── test_pipeline.py
 ├── .github/workflows/ci.yml
@@ -169,6 +178,19 @@ autocurator \
   --report reports/example_run.html
 ```
 `python -m autocurator.cli ...` works too once the package is installed.
+
+**Optional flags**
+
+- `--k N` — neighborhood size for the PRDC coverage metrics (default 5).
+- `--utility_model {linear,rf}` — utility estimator: linear baseline (default) or
+  a random forest that captures non-linear structure.
+- `--holdout path.csv` — a disjoint real set the generator never saw; enables the
+  stronger holdout-based membership-inference attack (`mia_auc_holdout`).
+
+**Config file.** Any option can be set in a YAML config; CLI arguments override it.
+```bash
+autocurator --config configs/example.yaml
+```
 
 ### Step 3, View Results
 Open `reports/example_run.html` in a browser (image links resolve relative to the
@@ -229,8 +251,8 @@ report's location, so the report and its `--out_dir` plots can live in different
     "per_feature_mean_wasserstein": 290.8,
     "correlation_distance": 0.0065
   },
-  "coverage": {"precision_like": 1.0, "recall_like": 1.0},
-  "privacy": {"syn_to_real_mean_nnd": 0.22, "syn_to_real_min_nnd": 0.11, "mia_auc_distance": 0.0},
+  "coverage": {"precision": 1.0, "recall": 1.0, "density": 1.16, "coverage": 1.0},
+  "privacy": {"syn_to_real_mean_nnd": 0.29, "syn_to_real_min_nnd": 0.13, "mia_auc_distance": 0.04},
   "utility": {"TSTR_AUC": 1.0, "TRTS_AUC": 1.0}
 }
 ```
@@ -244,4 +266,4 @@ report's location, so the report and its `--out_dir` plots can live in different
 - **Scikit-learn** for statistical modeling  
 - **Matplotlib** + **Seaborn** for visualization  
 - **Jinja2** for templated HTML reports  
-- **PyYAML** for configuration management  
+- **PyYAML** for optional `--config` files (`configs/example.yaml`)
