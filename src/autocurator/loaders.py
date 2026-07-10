@@ -1,10 +1,12 @@
 import pandas as pd
 
+
 def load_csv(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     if df.empty:
         raise ValueError(f"Empty CSV: {path}")
     return df
+
 
 def split_schema(df: pd.DataFrame, target: str | None = None):
     feat_cols = [c for c in df.columns if c != target] if target else df.columns.tolist()

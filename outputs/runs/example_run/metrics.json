@@ -2,7 +2,7 @@
   "summary": {
     "fidelity": {
       "per_feature_mean_jsd": 0.47503994540049793,
-      "per_feature_mean_ks": 0.12000000000000002,
+      "per_feature_mean_ks": 0.12000000000000006,
       "per_feature_mean_wasserstein": 290.84,
       "correlation_distance": 0.006492441999675345
     },
@@ -14,7 +14,7 @@
       "syn_to_real_mean_nnd": 0.22144160569421087,
       "syn_to_real_min_nnd": 0.11330112566217533,
       "syn_to_real_1pct_nnd": 0.11671207046792977,
-      "mia_auc_distance": 1.0
+      "mia_auc_distance": 0.0
     },
     "utility": {
       "TSTR_AUC": 1.0,
@@ -26,17 +26,17 @@
   "per_feature": {
     "age": {
       "JSD": 0.5265537695468318,
-      "KS": 0.1,
-      "Wasserstein": 1.1
+      "KS": 0.10000000000000009,
+      "Wasserstein": 1.0999999999999999
     },
     "income": {
       "JSD": 0.6242803065512634,
-      "KS": 0.2,
+      "KS": 0.20000000000000004,
       "Wasserstein": 1450.0
     },
     "score": {
       "JSD": 0.624280306551264,
-      "KS": 0.1,
+      "KS": 0.10000000000000009,
       "Wasserstein": 2.5
     },
     "visits": {

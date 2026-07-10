@@ -18,11 +18,13 @@ This benchmark analyzes a small dataset of customer attributes (`age`, `income`,
 |  | Correlation Distance | 0.0065 | Very high structure preservation |
 | **Coverage** | Precision-like | 1.0 | Synthetic points fall within real distribution |
 |  | Recall-like | 1.0 | Real points represented in synthetic manifold |
-| **Privacy** | Mean NN Distance | 0.22 | No synthetic data overlaps real points |
-|  | Min NN Distance | 0.11 | Safe minimal similarity |
-|  | MIA AUC | 1.0 | Excellent privacy protection |
-| **Utility** | TSTR AUC | 1.0 | Synthetic training transfers perfectly to real |
-|  | TRTS AUC | 1.0 | Real training transfers perfectly to synthetic |
+| **Privacy** | Mean NN Distance | 0.22 | Average synthetic-to-real nearest-neighbor distance |
+|  | Min NN Distance | 0.11 | Closest any synthetic point sits to a real point |
+|  | MIA AUC | 0.00 | Far from 0.5 → real and synthetic are distinguishable; below 0.5 signals memorization (see note) |
+| **Utility** | TSTR AUC | 1.0 | Synthetic training transfers to real |
+|  | TRTS AUC | 1.0 | Real training transfers to synthetic |
+
+> **Note on the bundled example.** The toy `synthetic.csv` is a lightly perturbed copy of `real.csv`. The corrected membership-inference metric (AUC ≈ 0.0) correctly flags this near-duplication as a privacy risk, and the perfect utility scores reflect that the two sets are almost identical. Treat it as a wiring example, not as a model of good synthetic data.
 
 ---
 
@@ -42,8 +44,8 @@ PRDC-like metrics describing manifold overlap.
 
 ### **Privacy**
 Quantifies distance and distinguishability.
-- **Nearest Neighbor Distance:** Large values indicate privacy.
-- **Membership Inference Attack (MIA):** Measures re-identification risk (AUC = 1.0 → perfectly safe).
+- **Nearest Neighbor Distance:** Larger synthetic-to-real distances indicate less overlap.
+- **Membership Inference Attack (MIA):** Distance-based re-identification proxy. An AUC near **0.5** means real and synthetic are indistinguishable by nearest-neighbor distance (low risk). Values far from 0.5 mean they are distinguishable; **below 0.5** indicates synthetic points sit unusually close to real ones (possible memorization / higher risk). Real points are compared against their nearest *other* real point so self-matches don't make the attack trivially perfect.
 
 ### **Utility**
 Assesses whether synthetic data supports the same predictions.
@@ -97,15 +99,27 @@ autocurator/
 │   └── example_run.html
 ├── src/
 │   └── autocurator/
+│       ├── __init__.py
 │       ├── cli.py
 │       ├── loaders.py
 │       ├── preprocess.py
 │       ├── viz.py
+│       ├── report.py
 │       └── metrics/
+│           ├── __init__.py
 │           ├── fidelity.py
 │           ├── coverage.py
 │           ├── utility.py
 │           └── privacy.py
+├── templates/
+│   └── report.html
+├── tests/
+│   ├── conftest.py
+│   ├── test_metrics.py
+│   └── test_pipeline.py
+├── .github/workflows/ci.yml
+├── pyproject.toml
+├── requirements.txt
 └── README.md
 ```
 
@@ -136,20 +150,29 @@ Correlation matrices of real and synthetic datasets are almost identical, confir
 
 ## How to Run
 
-### Step 1, Install Dependencies
+### Step 1, Install
+The package uses a `src/` layout, so install it (editable) to put `autocurator`
+on your path. This also pulls in the dependencies from `pyproject.toml`.
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
+Add the tooling used by CI with `pip install -e ".[dev]"`.
 
 ### Step 2, Run Benchmark
 ```bash
-python -m autocurator.cli   --real data/real.csv   --synthetic data/synthetic.csv   --target target   --task classification   --out_dir outputs/runs/example_run   --report reports/example_run.html
+autocurator \
+  --real data/real.csv \
+  --synthetic data/synthetic.csv \
+  --target target \
+  --task classification \
+  --out_dir outputs/runs/example_run \
+  --report reports/example_run.html
 ```
+`python -m autocurator.cli ...` works too once the package is installed.
 
 ### Step 3, View Results
-```bash
-start reports/example_run.html
-```
+Open `reports/example_run.html` in a browser (image links resolve relative to the
+report's location, so the report and its `--out_dir` plots can live in different folders).
 
 ---
 
@@ -171,8 +194,8 @@ start reports/example_run.html
 |:--|:--:|:--|
 | **Fidelity** | ★★★★☆ | Minor histogram divergence; strong structural alignment |
 | **Coverage** | ★★★★★ | Real and synthetic fully overlap |
-| **Privacy** | ★★★★★ | No re-identification risk |
-| **Utility** | ★★★★★ | Predictive patterns perfectly preserved |
+| **Privacy** | ★★☆☆☆ | Bundled example is near-duplicative; corrected MIA flags the overlap |
+| **Utility** | ★★★★★ | Predictive patterns preserved (example sets are nearly identical) |
 
 ---
 
@@ -207,7 +230,7 @@ start reports/example_run.html
     "correlation_distance": 0.0065
   },
   "coverage": {"precision_like": 1.0, "recall_like": 1.0},
-  "privacy": {"syn_to_real_mean_nnd": 0.22, "syn_to_real_min_nnd": 0.11, "mia_auc_distance": 1.0},
+  "privacy": {"syn_to_real_mean_nnd": 0.22, "syn_to_real_min_nnd": 0.11, "mia_auc_distance": 0.0},
   "utility": {"TSTR_AUC": 1.0, "TRTS_AUC": 1.0}
 }
 ```
