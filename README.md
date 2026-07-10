@@ -5,7 +5,7 @@
 It computes quantitative metrics for *fidelity*, *coverage*, *privacy*, and *utility*, then visualizes results through a detailed HTML report and publication-ready figures.
 
 This benchmark analyzes a small dataset of customer attributes (`age`, `income`, `score`, `visits`, `target`) to assess how closely synthetic samples resemble real data.
- 
+  
 ---
       
 ## Evaluation Summary
