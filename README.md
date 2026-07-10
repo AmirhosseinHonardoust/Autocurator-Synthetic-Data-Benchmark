@@ -104,11 +104,15 @@ autocurator/
 │   └── example_run.html
 ├── configs/
 │   └── example.yaml
+├── scripts/
+│   └── benchmark_generators.py
 ├── src/
 │   └── autocurator/
 │       ├── __init__.py
 │       ├── cli.py
 │       ├── config.py
+│       ├── datasets.py
+│       ├── generators.py
 │       ├── loaders.py
 │       ├── preprocess.py
 │       ├── viz.py
@@ -124,11 +128,16 @@ autocurator/
 ├── tests/
 │   ├── conftest.py
 │   ├── test_config.py
+│   ├── test_generators_datasets.py
+│   ├── test_generator_sensitivity.py
 │   ├── test_metrics.py
-│   └── test_pipeline.py
+│   ├── test_pipeline.py
+│   └── test_reference_validation.py
 ├── .github/workflows/ci.yml
+├── BENCHMARKS.md
 ├── pyproject.toml
 ├── requirements.txt
+├── requirements.lock
 └── README.md
 ```
 
@@ -231,7 +240,35 @@ report's location, so the report and its `--out_dir` plots can live in different
 
 ---
 
-## Future Enhancements
+## Validation & Benchmarks
+
+The metric implementations are checked against independent references in CI
+(`tests/test_reference_validation.py`):
+
+- **PRDC** matches the published `prdc` package (Naeem et al., 2020) to within 1e-9.
+- **Holdout MIA** matches a brute-force scipy/scikit-learn computation to within 1e-9.
+
+To confirm the metrics actually respond to synthetic-data quality, the repo ships
+reference generators of known quality (`autocurator.generators`) and real bundled
+datasets (`autocurator.datasets`: breast_cancer, wine, diabetes). Running every
+generator against every dataset produces `BENCHMARKS.md`:
+
+```bash
+python scripts/benchmark_generators.py > BENCHMARKS.md
+```
+
+The high-quality `resample` generator scores near-perfect fidelity/coverage/utility,
+`independent` and `noise` collapse them, and the row-copying `leaky` generator is
+flagged by the holdout MIA (≈0.83 vs ≈0.50 for private generators). These
+directional relationships are asserted in `tests/test_generator_sensitivity.py`.
+
+### Reproducibility
+
+CI runs the full gate (ruff, black, mypy strict, pytest ≥90% coverage) across
+Python 3.10, 3.11, and 3.12. `requirements.lock` pins an exact, verified
+dependency set (resolved on 3.12); a separate CI job installs from it and runs the
+suite. Day-to-day installs use the version floors in `pyproject.toml`.
+
 
 - Add **CTGAN** and **Diffusion** benchmark support.  
 - Implement **multivariate Wasserstein** and Earth Mover’s Distance.  
@@ -261,7 +298,7 @@ report's location, so the report and its `--out_dir` plots can live in different
 
 ## Tech Stack
 
-- **Python 3.10+**
+- **Python 3.10, 3.11, 3.12** (tested in CI)
 - **NumPy**, **Pandas**, **SciPy**
 - **Scikit-learn** for statistical modeling  
 - **Matplotlib** + **Seaborn** for visualization  
