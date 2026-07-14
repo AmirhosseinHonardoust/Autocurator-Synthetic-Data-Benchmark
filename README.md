@@ -1,5 +1,5 @@
 <div align="center">
-             
+                
 # Autocurator — Synthetic Data Benchmark
        
 ![Python](https://img.shields.io/badge/Python-3.10--3.12-blue)
