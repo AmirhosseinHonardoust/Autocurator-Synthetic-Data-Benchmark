@@ -10,7 +10,7 @@
 [![CI](https://github.com/AmirhosseinHonardoust/Autocurator-Synthetic-Data-Benchmark/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AmirhosseinHonardoust/Autocurator-Synthetic-Data-Benchmark/actions/workflows/ci.yml)
 
 </div>
-     
+
 A modular evaluation toolkit that benchmarks **synthetic tabular data** against **real data** across four axes — **fidelity, coverage, privacy, and utility** — with **reference-validated metrics**, a **generator sensitivity benchmark**, **HTML reporting**, **YAML-driven configuration**, and a **reproducible, multi-version CI pipeline**.
 
 > **Important:** Autocurator is an **evaluation and diagnostic tool**, not a certification of privacy or safety.
