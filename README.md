@@ -1,7 +1,7 @@
 <div align="center">
  
 # Autocurator — Synthetic Data 
-
+  
 ![Python](https://img.shields.io/badge/Python-3.10--3.12-blue)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-Metrics%20%2B%20Models-orange)
 ![Responsible ML](https://img.shields.io/badge/Responsible%20ML-Privacy%20%26%20Fidelity-green)
